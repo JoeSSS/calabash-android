@@ -797,9 +797,9 @@ module Calabash module Android
 
       def start_application(intent)
         begin
-          result = JSON.parse(http("/start-application", {intent: intent}, {read_timeout: 60}))
+          result = JSON.parse(http("/start-application", {intent: intent}, {read_timeout: 180}))
         rescue HTTPClient::ReceiveTimeoutError => e
-          raise "Failed to start application. Starting took more than 60 seconds: #{e.class} - #{e.message}"
+          raise "Failed to start application. Starting took more than 3 minutes: #{e.class} - #{e.message}"
         end
 
         if result['outcome'] != 'SUCCESS'
