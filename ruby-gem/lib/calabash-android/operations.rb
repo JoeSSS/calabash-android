@@ -408,14 +408,20 @@ module Calabash module Android
       end
 
       def uninstall_app(package_name)
-        log "Uninstalling: #{package_name}"
-        log `#{adb_command} uninstall #{package_name}`
+        exists = application_installed?(package_name)
+        
+        if exists
+          log "Uninstalling: #{package_name}"
+          log `#{adb_command} uninstall #{package_name}`
 
-        succeeded = !application_installed?(package_name)
+          succeeded = !application_installed?(package_name)
 
-        unless succeeded
-          ::Cucumber.wants_to_quit = true
-          raise "#{package_name} was not uninstalled. Aborting!"
+          unless succeeded
+            ::Cucumber.wants_to_quit = true
+            raise "#{package_name} was not uninstalled. Aborting!"
+          end
+        else
+          log "Package not installed: #{package_name}. Skipping uninstall."
         end
       end
 
@@ -789,10 +795,13 @@ module Calabash module Android
 
         start_application(options[:intent])
 
-        # What is Calabash tracking? Read this post for information
-        # No private data (like ip addresses) are collected
+        # What was Calabash tracking? Read this post for information
+        # No private data (like ip addresses) were collected
         # https://github.com/calabash/calabash-android/issues/655
-        Calabash::Android::UsageTracker.new.post_usage_async
+        #
+        # Removing usage tracking to avoid problems with EU General Data
+        # Protection Regulation which takes effect in 2018.
+        # Calabash::Android::UsageTracker.new.post_usage_async
       end
 
       def start_application(intent)
